@@ -1,0 +1,120 @@
+; Máquina de turing para somar dois números binários
+; Execute em -> https://morphett.info/turing/turing.html
+; Ex. de Entrada: 1111001#111000011
+; Saída esperada: 1000111100#1111001#111000011
+
+;Escreve o @ e move para o último caracter da direita
+0 0 0 l 0
+0 1 1 l 0
+0 _ @ r base_sum_recur
+
+; U == Y == 1
+; Z == X == 0
+base_sum_recur @ @ r base_sum_recur
+base_sum_recur # # r base_sum_recur
+base_sum_recur 1 1 r base_sum_recur
+base_sum_recur 0 0 r base_sum_recur
+base_sum_recur U U r base_sum_recur
+base_sum_recur Z Z r base_sum_recur
+base_sum_recur X X l check_first_num
+base_sum_recur Y Y l check_first_num
+base_sum_recur _ _ l check_first_num
+
+check_first_num 0 X l move_sum_first_0
+check_first_num 1 Y l move_sum_first_1
+check_first_num # # l move_to_second
+
+move_sum_first_0 0 0 l move_sum_first_0
+move_sum_first_0 1 1 l move_sum_first_0
+move_sum_first_0 # # l move_sum_second_0
+
+move_sum_second_0 U U l move_sum_second_0
+move_sum_second_0 Z Z l move_sum_second_0
+move_sum_second_0 0 Z l write_0_no_carry
+move_sum_second_0 @ @ l write_0_no_carry
+move_sum_second_0 1 U l write_1_no_carry
+
+write_0_no_carry 1 1 l write_0_no_carry
+write_0_no_carry 0 0 l write_0_no_carry
+write_0_no_carry @ @ l write_0_no_carry
+write_0_no_carry _ 0 r base_sum_recur
+
+write_1_no_carry 1 1 l write_1_no_carry
+write_1_no_carry 0 0 l write_1_no_carry
+write_1_no_carry @ @ l write_1_no_carry
+write_1_no_carry _ 1 r base_sum_recur
+
+move_to_second U U l move_to_second
+move_to_second Z Z l move_to_second
+move_to_second 0 Z l write_0_no_carry_second
+move_to_second 1 U l write_1_no_carry_second
+move_to_second @ # r replace
+
+sum_recur_second_number 1 1 r sum_recur_second_number
+sum_recur_second_number 0 0 r sum_recur_second_number
+sum_recur_second_number @ @ r sum_recur_second_number
+sum_recur_second_number Z Z l move_to_second
+sum_recur_second_number U U l move_to_second
+
+write_0_no_carry_second 1 1 l write_0_no_carry_second
+write_0_no_carry_second 0 0 l write_0_no_carry_second
+write_0_no_carry_second @ @ l write_0_no_carry_second
+write_0_no_carry_second _ 0 r sum_recur_second_number
+
+write_1_no_carry_second 1 1 l write_1_no_carry_second
+write_1_no_carry_second 0 0 l write_1_no_carry_second
+write_1_no_carry_second @ @ l write_1_no_carry_second
+write_1_no_carry_second _ 1 r sum_recur_second_number
+
+; Soma um
+move_sum_first_1 0 0 l move_sum_first_1
+move_sum_first_1 1 1 l move_sum_first_1
+move_sum_first_1 # # l move_sum_second_1
+
+move_sum_second_1 U U l move_sum_second_1
+move_sum_second_1 Z Z l move_sum_second_1
+move_sum_second_1 0 Z l write_1_no_carry
+move_sum_second_1 @ @ l write_1_no_carry
+move_sum_second_1 1 U l write_0
+
+write_0 1 1 l write_0
+write_0 0 0 l write_0
+write_0 @ @ l write_0
+write_0 _ 0 r carry_sum_recur
+
+write_1 1 1 l write_1
+write_1 0 0 l write_1
+write_1 @ @ l write_1
+write_1 _ 1 r carry_sum_recur
+
+carry_sum_recur @ @ r carry_sum_recur
+carry_sum_recur # # r carry_sum_recur
+carry_sum_recur 1 1 r carry_sum_recur
+carry_sum_recur 0 0 r carry_sum_recur
+carry_sum_recur U U r carry_sum_recur
+carry_sum_recur Z Z r carry_sum_recur
+carry_sum_recur X X l check_first_num_carry
+carry_sum_recur Y Y l check_first_num_carry
+carry_sum_recur _ _ l check_first_num_carry
+
+; caso encontre 0, volta para o ciclo sem carry
+check_first_num_carry 0 X l move_sum_first_1
+check_first_num_carry 1 Y l move_sum_first_0_carry
+check_first_num_carry # # l move_sum_second_1
+
+move_sum_first_0_carry 0 0 l move_sum_first_0_carry
+move_sum_first_0_carry 1 1 l move_sum_first_0_carry
+move_sum_first_0_carry # # l move_sum_second_0_carry
+
+move_sum_second_0_carry U U l move_sum_second_0_carry
+move_sum_second_0_carry Z Z l move_sum_second_0_carry
+move_sum_second_0_carry 0 Z l write_0
+move_sum_second_0_carry @ @ l write_0
+move_sum_second_0_carry 1 U l write_1
+
+replace Z 0 r replace
+replace U 1 r replace
+replace X 0 r replace
+replace Y 1 r replace
+replace # # r replace
+replace _ _ * halt-accept

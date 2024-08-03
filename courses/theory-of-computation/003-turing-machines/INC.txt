@@ -1,0 +1,72 @@
+; Máquina de turing para incrementar um número binário
+; Execute em -> https://morphett.info/turing/turing.html
+; Ex. de Entrada: 10001111
+; Saída esperada: 10010000#10001111
+
+; Escreve o # e move para o último caracter da direita
+0 0 0 l 0
+0 1 1 l 0
+0 _ # r r_move
+
+r_move 0 0 r r_move
+r_move 1 1 r r_move
+r_move _ _ l base_recur
+
+; Inicializa a base da recursão
+base_recur 0 Z l no_carry_write_1
+base_recur 1 U l carry_write_0
+base_recur # _ * halt-reject
+
+; Recursão sem carry
+no_carry_recur 0 0 r no_carry_recur
+no_carry_recur 1 1 r no_carry_recur
+no_carry_recur # # r no_carry_recur
+no_carry_recur Z Z l no_carry_check 
+no_carry_recur U U l no_carry_check 
+
+no_carry_check 1 U l no_carry_write_1
+no_carry_check 0 Z l no_carry_write_0
+no_carry_check # # r replace_characters
+
+no_carry_write_1 0 0 l no_carry_write_1
+no_carry_write_1 1 1 l no_carry_write_1
+no_carry_write_1 # # l no_carry_write_1
+no_carry_write_1 _ 1 r no_carry_recur
+
+no_carry_write_0 0 0 l no_carry_write_0
+no_carry_write_0 1 1 l no_carry_write_0
+no_carry_write_0 # # l no_carry_write_0
+no_carry_write_0 _ 0 r no_carry_recur
+
+; Recursão com carry
+carry_recur 0 0 r carry_recur
+carry_recur 1 1 r carry_recur
+carry_recur # # r carry_recur
+carry_recur Z Z l carry_check 
+carry_recur U U l carry_check 
+
+carry_check 1 U l carry_write_0
+carry_check 0 Z l no_carry_write_1
+carry_check # # l carry_write_1_aux 
+
+carry_write_1_aux 0 0 l carry_write_1_aux 
+carry_write_1_aux 1 1 l carry_write_1_aux 
+carry_write_1_aux # # l carry_write_1_aux 
+carry_write_1_aux _ 1 r replace_characters
+
+carry_write_1 0 0 l carry_write_1
+carry_write_1 1 1 l carry_write_1
+carry_write_1 # # l carry_write_1
+carry_write_1 _ 1 r carry_recur
+
+carry_write_0 0 0 l carry_write_0
+carry_write_0 1 1 l carry_write_0
+carry_write_0 # # l carry_write_0
+carry_write_0 _ 0 r carry_recur
+
+replace_characters U 1 r replace_characters
+replace_characters Z 0 r replace_characters
+replace_characters 1 1 r replace_characters
+replace_characters 0 0 r replace_characters
+replace_characters # # r replace_characters
+replace_characters _ _ * halt-accept
